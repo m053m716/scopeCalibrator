@@ -52,7 +52,7 @@ if isempty(F)
 end
 
 A = imread(fullfile(image_folder,F(1).name));
-[h,w] = size(A);
+[h,w,nChan] = size(A);
 
 %% IF CORRECTION EXISTS, LOAD IT, OTHERWISE PROMPT FOR CORRECTION
 p = mfilename('fullpath');
@@ -80,9 +80,16 @@ fprintf(1,'Performing correction...%03g%%\n',0);
 pct = 0;
 N = numel(F);
 for ii = 1:N
-   A = imread(fullfile(image_folder,F(ii).name));
-   B = A - cal.img; % Just subtract correction
-   imwrite(B,fullfile(out_folder,F(ii).name));
+   if nChan == 1
+      A = imread(fullfile(image_folder,F(ii).name));
+      B = A - cal.img; % Just subtract correction
+      imwrite(B,fullfile(out_folder,F(ii).name));
+   else % Otherwise, use LAB color space for median correction
+      A = rgb2lab(fullfile(image_folder,F(ii).name));
+      B = lab2rgb(A - cal.img); % Just subtract correction
+      imwrite(B,fullfile(out_folder,F(ii).name));
+   end
+   
    
    % Only overwrite when percentage increases:
    frac_done = floor(ii/N * 100); 

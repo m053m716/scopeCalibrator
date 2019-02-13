@@ -80,13 +80,16 @@ flag = true;
    function img = extractCorrectionImage(F,a)
       n = numel(F);
       
-      img = zeros(size(a,1),size(a,2),n);
+      img = zeros(size(a,1),size(a,2),size(a,3),n);
       
       fprintf(1,'Computing correction offset...%03g%%\n',0);
       pct = 0;      
       for i = 1:n
-         img(:,:,i) = imread(fullfile(F(i).folder,F(i).name));
-      
+         if (size(a,3) == 1)
+            img(:,:,:,i) = imread(fullfile(F(i).folder,F(i).name));
+         else
+            img(:,:,:,i) = rgb2lab(imread(fullfile(F(i).folder,F(i).name)));
+         end
          % Only overwrite when percentage increases:
          frac_done = floor(i/n * 100); 
          if frac_done > pct
@@ -94,7 +97,7 @@ flag = true;
             fprintf(1,'\b\b\b\b\b%03g%%\n',pct);
          end
       end
-      img = median(img,3); % Take median across all images for each pixel
+      img = median(img,4); % Take median across all images for each pixel
    end
 
 end
